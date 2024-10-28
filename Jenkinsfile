@@ -19,9 +19,16 @@ pipeline {
                 sh "mvn compile"
             }
         }
-        stage('Trivy FS') {
+        stage('Trivy Scan') {
             steps {
-                sh "trivy fs . --format table -o fs.html"
+                script {
+                    withCredentials([string(credentialsId: 'TRIVY_AUTH_TOKEN', variable: 'TRIVY_AUTH_TOKEN')]) {
+                        sh '''
+                            export TRIVY_AUTH_TOKEN=${TRIVY_AUTH_TOKEN}
+                            trivy fs . --format table -o fs.html
+                        '''
+                    }
+                }
             }
         }
         stage('SonarQube Analysis') {
