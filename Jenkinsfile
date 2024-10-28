@@ -62,7 +62,14 @@ pipeline {
         }
         stage('Trivy Image Scan') {
             steps {
-                sh "trivy image --format table -o image.html gokulabalan/blog-app:latest"
+                script {
+                    withCredentials([string(credentialsId: 'TRIVY_AUTH_TOKEN', variable: 'TRIVY_AUTH_TOKEN')]) {
+                        sh '''
+                            export TRIVY_AUTH_TOKEN=${TRIVY_AUTH_TOKEN}
+                            trivy image --format table -o image.html gokulabalan/blog-app:latest
+                        '''
+                    }
+                }
             }
         }
         stage('Docker Push Image') {
